@@ -1,0 +1,50 @@
+LET'S TEST IT — PROGRESS LOG
+Updated: 2026-11-02
+
+Phase: 0 — Foundation, storefront prototype, documentation
+Status: Phase 0 implementation and local validation complete; no public deployment performed.
+
+Repository baseline
+- Existing scaffold: Next.js 16.4.3 App Router, React 19, TypeScript, Tailwind CSS 4, pnpm 12.3.4.
+- The repository was a minimal v0 placeholder page with default metadata and theme.
+- Existing shadcn setup uses Base UI primitives; its Button component is retained.
+- No backend, database, authentication, payment, or lab implementation was present.
+
+Approved decisions
+- The master brief names Vite, but the user explicitly approved keeping the existing Next.js 16 stack.
+- Configure Next.js for a static export so the Cloudflare Pages static-hosting candidate remains viable without a public server.
+- Use synthetic IDR base prices and a documented fixed IDR 15,800 per USD display assumption.
+- Keep cart, language, and currency preferences in browser local storage for prototype use only.
+
+Completed in Phase 0
+- Added a typed 36-item outdoor/travel catalog, catalog-service abstraction, EN/ID copy, IDR/USD formatting, and local-only demo cart.
+- Completed home, catalog/search/filter, all 36 static product detail routes, cart, simulated checkout/confirmation/tracking, corporate pages, and simulated contact/newsletter states.
+- Authored original SVG campaign and category artwork; no stock/product photos used.
+- Added a public-export boundary scan, Cloudflare Pages response headers, environment example, and non-running PostgreSQL Compose example for future use.
+- Completed the required project, architecture, deployment, free-tier, ROE, open-decision, asset, test, and roadmap documents.
+
+Commands already run
+- Repository inspection with Glob/Read and `ls -la`.
+- `pnpm add -D eslint@^9 eslint-config-next@16.4.3` — completed.
+- `pnpm remove @vercel/analytics` — completed; no analytics script is used by the storefront.
+- `pnpm exec shadcn docs button` — completed; existing Base UI Button usage was checked.
+- Official documentation reviewed: Next.js static exports, Cloudflare Pages limits/Next.js, Vercel Hobby plan.
+
+Validation status
+- `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, and `pnpm check:public-build` passed.
+- Next.js generated 50 static pages, including 36 product routes; `out/` measured 3.5 MB.
+- Browser spot checks passed at desktop 1600×896 and mobile 390×844, including core storefront/cart/form flows. See `06-testing-report.txt` for details and test caveats.
+
+Phase gate
+- Phase 0 is the only authorized phase. Do not begin Phase 1 or later without explicit user approval.
+- Final handoff and actual validation results are recorded in `06-testing-report.txt`; preview/deployment guidance and proposed next phase are in `02-deployment-plan.txt` and `08-roadmap.txt`. Stop at the Phase 0 gate.
+
+Phase 3 (2026-11-13) — Authentication, ownership/RBAC, dashboards
+- Removed static export; headers moved to next.config.mjs; Supabase email/password auth (no OAuth); /login /register /forgot-password
+  /reset-password /auth/callback; /dashboard; /admin (+users, roles, audit); proxy.ts; owner bootstrap; role-aware header.
+- Migrations drafted (NOT applied anywhere): supabase/proposed-migrations/0001, 0002.
+- Dependencies to install locally: pnpm add @supabase/supabase-js @supabase/ssr server-only  (lockfile must be committed).
+- Details, limitations and manual test plan: docs/11-phase3-report.txt. Phases 4+ require separate approval.
+
+2026-11-13  PHASE 3b (UI/flow) — intro page + login gate, profile/settings/admin header buttons, /settings page.
+            See docs/12-phase3b-intro-gate-settings.txt. Migration 0003 proposed, NOT applied. Not built/run in sandbox.

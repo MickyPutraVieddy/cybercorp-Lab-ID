@@ -1,0 +1,54 @@
+LET'S TEST IT — PHASE 1 AUDIT (BASELINE)
+Date: 2026-11-13
+Method: static review of the uploaded repository + local `tsc --noEmit` (exit 0).
+Not done (no network in review sandbox): `pnpm audit`, live header checks, runtime/browser tests.
+Rule: nothing below is called "confirmed vulnerability" without evidence. No auth/API/DB exists yet,
+so there is nothing to attack at the moment; items are architecture blockers or observations.
+
+1. CURRENT ARCHITECTURE
+- Next.js 16.4.3 App Router (root `app/`), React 19, TypeScript strict, Tailwind 4, shadcn(Base UI) Button, pnpm.
+- `next.config.mjs`: output 'export', trailingSlash, images.unoptimized  (static site, no server).
+- Routes (all static): / /catalog /products/[slug] (36, generateStaticParams, dynamicParams=false) /cart /checkout
+  /order-confirmation /order-tracking /about /careers /contact /help /privacy /terms.
+- Data: src/catalog (36 synthetic products), src/store (EN/ID messages, IDR/USD, cart in localStorage).
+- UI: src/components/store/* + app/globals.css (design tokens: green/cream/terracotta, serif headings). MUST be preserved.
+- Navigation uses custom `static-link.tsx` (plain <a>, full page loads) instead of next/link.
+- Backend/DB/Auth/API routes/middleware: none. Supabase: none installed. Env vars read by code: none.
+
+2. FINDINGS
+ID     Title                                         Class          Severity  Status
+LT-001 Static export blocks server-side auth/RBAC    Blocker (arch) High*      Open  (*impact on plan, not a vuln)
+       Evidence: next.config.mjs `output: 'export'`. Route handlers, middleware(proxy), cookies/session refresh,
+       server-side role checks cannot run. Remediation: remove `output`/`trailingSlash` constraint for Vercel
+       (needs your approval, changes how the site is built). Verify: `next build` shows dynamic/server routes.
+LT-002 Security headers use Cloudflare `_headers`    Potential      Medium    Open
+       Evidence: public/_headers only; Vercel does not read this file. On Vercel those headers will not be sent.
+       Remediation: move to `headers()` in next.config + add CSP (report-only first). Verify: curl -I on preview.
+LT-003 No CSP, no frame protection                   Potential      Low-Med   Open
+       Evidence: docs/02 states no CSP; no X-Frame-Options (intentional for embedding). Needed once login exists
+       (clickjacking on /login, /admin). Remediation: frame-ancestors 'none' on auth/admin/lab routes.
+LT-004 Public-build scan conflicts with new modules  Confirmed       Low       Open
+       Evidence: scripts/check-public-build.mjs rejects paths/refs matching red-team|blue-team|sandbox|backend
+       and scans only `out/`. After LT-001 there is no `out/`, and routes /red-team,/blue-team would be flagged.
+       Remediation: rewrite check to scan `.next` for secrets/service-role/flag patterns instead of path names.
+LT-005 Postgres Compose + POSTGRES_* env placeholders Observation   Info      Open
+       Evidence: docker/compose.example.yml, .env.example. Conflicts with "Supabase only" requirement; unused by code.
+       Remediation: mark deprecated (not deleted without approval).
+LT-006 Checkout/order are client-only simulation     Observation    Info      Accepted (by design)
+       Evidence: checkout-screen.tsx builds `DEMO-<Date.now()>` code, clears cart, no server validation of
+       price/stock. Becomes a real risk only if real orders are added; the price/stock must then be server-checked.
+LT-007 Whole site is noindex + "prototype" wording    Observation   Info      Open
+       Evidence: layout.tsx robots {index:false}. Decide before public launch.
+LT-008 Dependency vulnerabilities                    NOT ASSESSED   —         Open
+       Reason: no network. Run `pnpm audit` locally / Vercel build logs / Dependabot.
+LT-009 Vercel Hobby is non-commercial                Observation   Info      Open
+       Evidence: docs/03. Fine for lab/portfolio; a real paid store needs Pro.
+
+3. CHECKED, NO ISSUE FOUND (with evidence)
+- No dangerouslySetInnerHTML / innerHTML / eval in src/ or app/ (grep).
+- localStorage cart is shape-validated (`validCart`) and holds no identity/payment data.
+- `.env*` ignored by git; only `.env.example` tracked; no secrets in repo.
+- TypeScript strict typecheck passes.
+
+4. FEATURES THAT MUST BE PRESERVED
+All storefront pages, 36 products, EN/ID + IDR/USD switch, cart/checkout simulation, brand + CSS tokens, copy in messages.ts.

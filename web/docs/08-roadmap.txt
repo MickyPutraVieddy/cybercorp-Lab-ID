@@ -1,0 +1,45 @@
+LET'S TEST IT — ROADMAP
+Updated: 2026-11-02
+
+Phase 0 — Foundation, storefront prototype, documentation
+- Status: In progress; user authorized this phase only.
+- Acceptance: polished responsive storefront; 36 coherent synthetic products; search/filter/details/quantity/cart/locale/currency work; checkout/tracking/forms are clearly simulated; original artwork and manifest; required .txt docs; no backend/login/payment/vulnerabilities/flags/private portals; public export checked; typecheck/lint/build/accessibility/browser test results documented.
+- Gate: stop and request explicit approval after final Phase 0 handoff.
+
+Phase 1 — Backend foundation
+- Status: Not authorized.
+- Dependencies: explicit approval; agree on Node.js + TypeScript API design, PostgreSQL schema/migrations/seed data, local Mac/Ubuntu ARM64 Compose strategy, API boundary, tests, and security configuration.
+- Acceptance: only after its approved design is implemented and reviewed.
+
+Phase 2 — Authentication and normal business workflows
+- Status: Not authorized.
+- Dependencies: approved Phase 1 foundation and explicit approval of each customer/support/admin workflow.
+- Acceptance: production-style server authorization, secure sessions, validation, scoped data access, rate limiting, audit logging, and safe test accounts.
+
+Phase 3 — Private target scenarios and flags
+- Status: Not authorized.
+- Dependencies: explicit written scope/ROE and private isolated lab architecture; separate deployment from public storefront.
+- Acceptance: only approved, resettable synthetic scenarios, server-side private registry/flags, validation evidence, and no public artifact leakage.
+
+Phase 4 — Blue Team and Splunk
+- Status: Not authorized.
+- Dependencies: private lab and approved event schema/data flow.
+- Acceptance: structured safe events, Splunk inputs/sourcetypes/SPL/detections/dashboard definitions; no public Splunk exposure.
+
+Phase 5 — Red Team workflow and reporting
+- Status: Not authorized.
+- Dependencies: explicit scope/ROE and user approval.
+- Acceptance: manual Kali workflow, target inventory/evidence/report templates; any automation must enforce authorized scope and avoid destructive/out-of-scope behavior.
+
+Phase 6 — Private file-analysis sandbox
+- Status: Not authorized.
+- Dependencies: isolated disposable analysis architecture and validated network/filesystem controls.
+- Acceptance: quarantined file workflow, static-first analysis, sanitized reports, audit controls, isolation/reset validation.
+
+Phase 7 — Deployment, operations, and final validation
+- Status: Not authorized.
+- Dependencies: approved public host/plan and private Ubuntu environment; security review; explicit deployment approval.
+- Acceptance: public safe static frontend, private lab services, backup/restore/rollback, operational docs, no leaked artifacts, full authorized review.
+
+Phase gate rule
+- Do not start Phase 1 or any later phase unless the user explicitly approves that phase.

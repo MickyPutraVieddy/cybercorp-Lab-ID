@@ -1,0 +1,36 @@
+LET'S TEST IT — FREE-TIER ANALYSIS
+Research checked: 2026-11-02
+
+Scope
+- This compares likely static-preview candidates for a Next.js static export. It is not a final provider selection or a guarantee of future terms.
+- No database or backend is required by Phase 0; database/free-tier comparisons are deferred until that architecture is approved.
+- Free limits and terms change. Re-check provider pages and account onboarding before deployment.
+
+Cloudflare Pages Free — strongest fit for the current static export
+- Cloudflare Pages limits page (last updated 2026-09-05): 500 builds per month; one build at a time; 20-minute build timeout.
+- Maximum 20,000 site files on Free; maximum single asset size 25 MiB.
+- Pages Functions use the Workers Standard usage model and count against Workers usage. This prototype does not use Functions.
+- The cited limits page did not state a numeric static bandwidth allowance. Do not assume a specific bandwidth quota from this comparison; check current account/product terms.
+- Pages allows up to 100 custom domains per project according to the limits page. No custom domain has been selected.
+- Cloudflare's Next.js guide (last updated 2026-08-25) says Cloudflare recommends vinext on Workers for full-stack Next.js, and directs static exports to Pages. This app uses static export only and does not need a server runtime.
+- Card requirement, sleep behavior, and billing details were not confirmed in the cited limits page; verify during account setup.
+
+Vercel Hobby — convenient preview, not the default for a commercial shop
+- Official Hobby plan page describes Hobby as free with monthly included usage and no billing cycle.
+- Included examples shown on the page: 100 GB Fast Data Transfer, 10 GB Fast Origin Transfer, 1,000,000 CDN requests, 1,000,000 Function Invocations, and 50,000 Web Analytics Events/month. Exact resources and definitions may change.
+- In most over-limit cases the page says a user must wait 30 days before that feature is available again; Web Analytics has a shorter 7-day pause after its grace period.
+- Hobby terms restrict usage to personal, non-commercial use. This is suitable only for an individual non-commercial prototype; do not use Hobby for an operational revenue-generating Let's Test It store.
+- The page does not identify a free trial billing cycle for Hobby (it is free); Pro trial/payment details are separate. Verify card requirements for any account-specific upgrade.
+- Static Next.js output can be hosted there, but no server features are needed here.
+
+Comparison and recommendation
+- For the current shareable, static prototype, Cloudflare Pages Free is the leading candidate: known static deployment path, no server, and no database costs.
+- Vercel Hobby is convenient for preview and individual non-commercial work, but its non-commercial restriction makes it a poor default for a real commercial storefront.
+- No provider has been connected or deployed in Phase 0. The final choice, custom domain, commercial plan, and current card requirements remain open until deployment is approved.
+- Cloudflare Free has build/file-size constraints; validate output size and build cadence. There is no database/storage usage in this prototype.
+
+Primary sources checked 2026-11-02
+- Cloudflare Pages limits: https://developers.cloudflare.com/pages/platform/limits/
+- Cloudflare Next.js guide: https://developers.cloudflare.com/pages/framework-guides/nextjs/
+- Vercel Hobby plan: https://vercel.com/docs/plans/hobby
+- Next.js static exports: https://nextjs.org/docs/app/guides/static-exports

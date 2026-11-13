@@ -1,0 +1,95 @@
+LET'S TEST IT — PHASE 3 REPORT
+Date: 2026-11-13
+Scope: email/password auth, owner bootstrap, RBAC, /dashboard, /admin, role-aware header. No OAuth. No Red/Blue Team yet.
+
+1. MIGRATION STATUS
+ - supabase/proposed-migrations/0001_identity_rbac.sql   : DRAFTED, REVIEWED, NOT APPLIED to any project.
+ - supabase/proposed-migrations/0002_role_management_and_permissions.sql : DRAFTED, NOT APPLIED.
+ - Production: untouched. Apply to the LAB Supabase project first, only after you read them.
+ - Self-review fixes vs the first draft: audit_logs FK would have blocked user deletion; profile column privileges; TRUNCATE
+   protection; audit triggers on every role/permission change; idempotent re-runs; backfill of pre-existing users.
+
+2. VERIFICATION ACTUALLY RUN (in the review sandbox, no network, no Supabase)
+ - `tsc --noEmit`: PASS (exit 0) — BUT against temporary hand-written type stubs for @supabase/ssr, @supabase/supabase-js and
+   server-only, because those packages could not be installed here. Re-run `pnpm typecheck` after installing them.
+ - `eslint app src proxy.ts scripts next.config.mjs`: PASS (no output).
+ - NOT run: `next build`, runtime/browser tests, any Supabase call, email delivery, RLS tests, pnpm audit.
+ - Therefore: NO Supabase integration test has been executed. Nothing below in section 5 is claimed to pass.
+
+3. CHANGES
+ Modified: .env.example, app/globals.css (append-only block), docker/compose.example.yml (deprecation header), docs/00,01,02,04,
+   next.config.mjs (export removed, headers migrated), public/_headers (comment only), scripts/check-public-build.mjs,
+   src/components/store/store-header.tsx (+2 AuthNav lines, +1 import).
+ Created: proxy.ts; app/{login,register,forgot-password,reset-password,dashboard}/page.tsx; app/admin/{layout,page}.tsx,
+   app/admin/{users,roles,audit}/page.tsx; app/auth/callback/route.ts; app/api/me/route.ts;
+   src/supabase/{server,admin}.ts; src/server/{env,roles,validation,session,rbac,security-events}.ts;
+   src/server/actions/{types,auth,admin}.ts; src/components/auth/*; src/components/admin/role-form.tsx;
+   supabase/proposed-migrations/*.sql; docs/09,10,11.
+ Untouched: all storefront pages, catalog, cart/checkout, messages.ts, existing CSS rules, brand assets.
+ Behavior change to know: trailingSlash was removed with the static export. /catalog/ now redirects to /catalog (query kept).
+
+4. KNOWN LIMITATIONS
+ - REQUIRED before build: pnpm add @supabase/supabase-js @supabase/ssr server-only  (updates pnpm-lock.yaml; commit it, or Vercel's
+   frozen-lockfile install fails).
+ - Not executed anywhere yet: see section 2. Expect to fix small issues on first real run (e.g. Supabase SDK type differences).
+ - Email confirmation uses PKCE `?code=`; the link must be opened in the SAME browser that registered. For cross-device use, set the
+   Supabase email templates to the token_hash form (section 5, step 4). /auth/callback supports both.
+ - Header shows nav via GET /api/me after page load (brief placeholder). It is UI only; all access control is server-side.
+ - No custom rate limiting beyond Supabase Auth limits; configure Supabase rate limits/CAPTCHA before going public.
+ - Password policy (>=10, upper/lower/digit, <=72 bytes) is enforced by our server code; set Supabase min length to 10 as well.
+ - Admin screens are English only; auth/dashboard are EN/ID. Permission editing UI, website content, product management, system
+   settings are NOT implemented (shown as "Not implemented yet"). Users list is paged (25) with no search.
+ - security_events: only basic auth/authz events are written (best-effort). Detection rules/alerts/incidents = Phase 5.
+ - Role counts on /admin read max 1000 rows.
+ - Owner bootstrap triggers when the owner logs in/visits (server-side, idempotent). It needs SUPABASE_SERVICE_ROLE_KEY set.
+ - Vercel Hobby is non-commercial.
+
+5. EXACT MANUAL TESTS (do in the LAB Supabase project + a Vercel Preview or `pnpm dev`)
+ SETUP
+ 1. pnpm add @supabase/supabase-js @supabase/ssr server-only ; pnpm install ; pnpm typecheck ; pnpm lint ; pnpm build. Record results.
+ 2. Create Supabase project `lets-test-it-lab`. Authentication > Providers: Email ON, "Confirm email" ON, all others OFF.
+    Authentication > Policies/Password: minimum length 10.
+ 3. URL Configuration: Site URL = your URL (http://localhost:3000 or Vercel preview); Redirect URLs add <site>/auth/callback.
+ 4. (Recommended) Authentication > Email Templates: Confirm signup link ->
+      {{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=signup&next=/dashboard
+    Reset password link ->
+      {{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery
+ 5. Read, then run in SQL editor (lab only): 0001 then 0002. Run `select * from public.user_roles;` (empty/only 'user' rows).
+ 6. Set env vars (.env.local / Vercel): NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY,
+    NEXT_PUBLIC_SITE_URL, APP_ENV=lab, SECURITY_IP_HASH_SALT. Leave SUPABASE_OWNER_USER_ID empty for now.
+ AUTH
+ T1 Register with a new email + strong password + terms. Expect "check your email" message. Check DB: profiles + user_roles row, role='user'.
+ T2 Try to log in BEFORE confirming. Expect "confirm your email first".
+ T3 Open the email link. Expect landing on /dashboard?notice=confirmed (same browser) and logged in.
+ T4 Register again with the SAME email. Expect the same neutral message (no "already registered").
+ T5 Register with password "short", mismatched confirm, no terms. Expect each validation message.
+ T6 Log in with wrong password. Expect "Invalid email or password"; log in correctly -> /dashboard. Header shows Dashboard/Log out.
+ T7 Reload, close/reopen tab: session persists. Log out: header returns to Log in/Register; /dashboard redirects to /login?next=/dashboard.
+ T8 Forgot password: submit your email -> neutral message; open link -> /reset-password; set new strong password -> /dashboard?notice=password-updated;
+    log in with new password. Submit a non-existent email -> identical neutral message.
+ T9 Open /reset-password while logged out -> redirected to /forgot-password with "invalid or expired".
+ T10 Dashboard: edit full name (saved); change password with wrong current password (rejected) and right one (accepted).
+ T11 /login?next=https://evil.example and /login?next=//evil.example -> after login you land on /dashboard, never off-site.
+ OWNER / RBAC
+ T12 Copy your own user UUID (Authentication > Users) into SUPABASE_OWNER_USER_ID, redeploy/restart. Log in as that user.
+     Expect redirect to /admin and role Owner. SQL: select * from public.user_roles where role='owner'; (exactly 1 row);
+     select * from public.audit_logs order by created_at desc; (shows role_assigned for owner).
+ T13 Restart/reload several times: no duplicate audit rows (idempotent).
+ T14 Register + confirm a second account B. B visits /admin -> redirected to /dashboard?notice=forbidden.
+ T15 As owner, /admin/users: promote B to admin. Audit page shows role_changed with actor=owner. Log in as B: /admin works,
+     Users visible, but no "Change role" controls; /admin/audit redirects (admin lacks audit.read).
+ T16 As owner promote B to super_admin, register account C. As B: C can be set user<->admin; B cannot see controls for the owner
+     or for itself; no super_admin option offered.
+ T17 Direct attack attempts (should ALL fail), run in SQL editor as role `authenticated` or via supabase-js with B's session:
+     update public.user_roles set role='owner' where user_id=<B>;  -> permission denied / RLS.
+     update public.user_roles set role='admin' where user_id=<B>;  -> denied (no UPDATE privilege).
+     select * from public.audit_logs; as a plain user -> 0 rows.   delete from public.audit_logs; -> denied.
+ T18 Try to forge a request: in browser devtools replay the role-change server action as account C (plain user) -> "forbidden".
+ T19 Service role: confirm the key string never appears in browser: view-source / Network tab / `grep -r service_role .next/static`
+     (or run `pnpm check:public-build` after build).
+ T20 Security headers: `curl -sI <site>/login` -> X-Frame-Options DENY, CSP frame-ancestors 'none', Cache-Control no-store;
+     `curl -sI <site>/` -> nosniff, Referrer-Policy, HSTS, Permissions-Policy.
+ T21 Storefront regression: browse /, /catalog, a product, add to cart, EN/ID + IDR/USD, checkout simulation, contact/newsletter.
+ T22 Events: select event_type, classification, metadata from public.security_events order by occurred_at desc; verify login_failed /
+     login_success exist, metadata contains hashed identifier only (no email, password, token).
+ T23 Before PRODUCTION: repeat setup on a separate Supabase project with its own keys; run migrations only after explicit approval.

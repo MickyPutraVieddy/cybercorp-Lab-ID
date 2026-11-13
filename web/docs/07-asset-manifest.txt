@@ -1,0 +1,18 @@
+LET'S TEST IT — ASSET MANIFEST
+Updated: 2026-11-02
+
+All listed SVG assets are original inline/local vector illustrations authored for this prototype. No external images, stock photography, user-provided assets, or generated AI images are included. Product category artwork is intentionally illustrative and is not represented as product photography.
+
+Path | Purpose | Source/license | Format | Status
+public/icon.svg | Browser icon | Original project-authored vector | SVG | Complete
+public/brand-mark.svg | Header/footer brand mark | Original project-authored vector | SVG | Complete
+public/artwork/campaign.svg | Home campaign landscape | Original project-authored illustration | SVG | Complete
+public/artwork/packs.svg | Packs and bags category artwork | Original project-authored illustration | SVG | Complete
+public/artwork/camp.svg | Camp and sleep category artwork | Original project-authored illustration | SVG | Complete
+public/artwork/apparel.svg | Apparel category artwork | Original project-authored illustration | SVG | Complete
+public/artwork/travel.svg | Travel gear category artwork | Original project-authored illustration | SVG | Complete
+public/artwork/hydration.svg | Hydration category artwork | Original project-authored illustration | SVG | Complete
+public/artwork/essentials.svg | Trail essentials category artwork | Original project-authored illustration | SVG | Complete
+
+Product photography | Product detail and future merchandising | User-provided photography pending | User image files | Empty slot; not fabricated
+Brand wordmark | Text wordmark in header/footer uses live typography and brand-mark.svg | Original text treatment | HTML/SVG mark | Complete

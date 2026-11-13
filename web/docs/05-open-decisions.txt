@@ -1,0 +1,31 @@
+LET'S TEST IT — OPEN DECISIONS
+Updated: 2026-11-02
+
+Resolved for Phase 0
+1. Frontend framework
+   - Conflict: master brief originally names React + Vite; repository already uses Next.js 16 App Router.
+   - User explicitly approved keeping Next.js 16 rather than migrating to Vite.
+   - Implementation: Next.js static export; preserve existing root `app/` route convention.
+   - Status: Resolved for Phase 0. Any future backend integration still requires an architecture review.
+
+2. Prototype currency display
+   - IDR is the stable authored base price. USD display uses fixed assumption IDR 15,800 per USD.
+   - This is deterministic and illustrative, not a live or promised exchange rate. No conversion silently changes stored product base prices.
+   - Status: Resolved for prototype; reconfirm product price policy before launch.
+
+3. Cart and preference storage
+   - Demo cart, language, and currency are stored in localStorage on the current browser only. No personal details are stored.
+   - Status: Resolved for prototype; replace with account/server persistence only after explicit Phase 1/2 approval.
+
+Still open before a real launch
+- Confirm actual product catalog, independent market prices, specifications, stock, photography, and availability.
+- Confirm product photography and asset licensing; user has not supplied photos.
+- Confirm permanent brand/legal entity, shipping origin, shipping charges, return period, warranty, support contacts, tax treatment, privacy/terms, and consumer-law review.
+- Decide final public host and plan. Cloudflare Pages Free is a candidate for static export; verify card requirements, account eligibility, bandwidth/usage definitions, custom domain, and terms. Vercel Hobby cannot be assumed suitable for commercial use.
+- Decide whether the storefront should remain a static brochure/catalog or later connect to an approved Node/PostgreSQL backend.
+- Confirm final USD exchange-rate policy or independently authored USD prices.
+- Confirm font licensing and final brand typography before launch. Current design uses system sans-serif and Georgia serif fallbacks.
+- Decide whether location, customer accounts, real orders, newsletter signup, and support workflows are needed; none exist in Phase 0.
+
+Phase gate
+- Phase 1 and later phases remain unauthorized until the user explicitly approves them.

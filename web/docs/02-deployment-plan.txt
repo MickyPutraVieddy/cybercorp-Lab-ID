@@ -1,0 +1,36 @@
+NOTE (Phase 3): Cloudflare Pages static hosting is no longer applicable (server runtime required). Target host: Vercel (Node runtime).
+Security headers moved from public/_headers to next.config.mjs. Required env vars: see .env.example. Vercel Hobby remains non-commercial only.
+
+LET'S TEST IT — DEPLOYMENT PLAN
+Updated: 2026-11-02
+
+Phase 0 preview
+- Run the existing Next.js dev server using the project `dev` script in the development environment. The preview requires no API keys, database, or external service.
+- For a production-like static artifact, run `pnpm build`; Next.js writes static files to `out/`.
+- Serve the `out/` directory with a static host. Do not use `next start` for the exported static site.
+
+Public frontend candidate
+- Cloudflare Pages is the current static-host candidate because this approved app is a static export.
+- Deploy the contents of `out/`; verify clean URLs/trailing-slash routes, product deep links, query-string filters, and `_headers` on a preview deployment before a real launch.
+- The prototype does not require Cloudflare Functions, Workers, database bindings, secrets, or a custom domain.
+- Cloudflare's Next.js guide states that full-stack Next.js should use vinext on Workers, while a static Next.js export can be deployed to Pages. This project intentionally uses only the static-export path.
+- Vercel remains an easy preview option for an individual non-commercial prototype. Its Hobby terms restrict use to personal, non-commercial projects; a real revenue-generating storefront requires a plan that permits commercial use.
+
+Development and future private environment (not deployed in Phase 0)
+- Mac: frontend development host; pnpm and Node.js versions should be recorded when selected for regular local development.
+- Ubuntu 26.04 ARM64 UTM VM: future private application/lab host, not assumed public.
+- `docker/compose.example.yml` documents a future local PostgreSQL service bound to loopback. It was not run in Phase 0.
+- Backend, PostgreSQL, internal portals, lab, and Splunk stay private in the future architecture. No public backend is approved.
+- Splunk and sandbox networking, backup, restore, rollback, and deployment specifics remain for later approved phases.
+
+Environment variables
+- The current storefront requires no runtime environment variables.
+- `.env.example` contains only placeholders for future local development. Never commit a real `.env` or database password.
+- No frontend secret or public API base URL is currently configured.
+
+Headers and operational checks
+- `public/_headers` adds nosniff, strict-origin referrer policy, production HTTPS HSTS, and disables unused camera/microphone/geolocation features.
+- No X-Frame-Options header is used because a public showcase may be embedded.
+- No CSP is enforced in this static prototype; review a report-only CSP against the final deployment before tightening.
+- Before any public launch: review price/currency disclosure, legal pages, privacy/data retention, shipping/returns claims, accessibility, custom-domain TLS, error/404 handling, dependency updates, and provider terms.
+- No public website logs are sent to Splunk in v1.

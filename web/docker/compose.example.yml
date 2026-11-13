@@ -1,0 +1,22 @@
+# DEPRECATED (Phase 3): Supabase is the only active backend/database. This file is unused by the app and is kept
+# only until it is verified that nothing depends on it. Do not use it for the Security Lab or production.
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lets_test_it_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-lets_test_it_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD before starting this future local service}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

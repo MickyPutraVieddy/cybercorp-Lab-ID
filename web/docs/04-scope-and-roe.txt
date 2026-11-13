@@ -1,0 +1,32 @@
+LET'S TEST IT — SCOPE AND RULES OF ENGAGEMENT
+Updated: 2026-11-02
+
+Phase 0 authorization
+- Approved target: this local, fictional storefront prototype and its synthetic local data, for ordinary functional, accessibility, and responsive UI checks only.
+- No public internet target, third-party service, production system, or private lab is authorized by this Phase 0 approval.
+- The test scope does not include vulnerability probing, exploitation, credential testing, destructive testing, automated attack tooling, or security challenge validation.
+
+Allowed Phase 0 checks
+- Verify navigation, search, category/availability filters, sorting, static product details, stock-limited quantity behavior, local demo cart, locale/currency switching, simulated checkout/tracking, and simulated form success.
+- Inspect the exported `out/` build for accidental private artifact paths or flag-shaped values using the documented public-build check.
+- Run static typecheck/lint/build and browser-based visual/accessibility spot checks.
+
+Excluded
+- No Red Team, Blue Team, SOC, sandbox, challenge, lab, flag, internal portal, intentionally vulnerable behavior, or real backend is implemented.
+- No real payment, email, support ticket, customer account, customer database, or shipment is created.
+- No real person should enter private, payment, address, or confidential data into this prototype.
+
+Future work requires a separate written approval
+- Define the exact authorized target(s), owner, environment, test window, allowed methods, data handling, stop conditions, and emergency contact before any private security test.
+- Keep any future lab isolated and private; it must not share public production data, credentials, routes, or challenge secrets.
+- Preserve blind-assessment behavior until an authorized assessment has ended and the user asks for validation/debrief.
+
+PHASE 3 UPDATE (2026-11-13) — SECURITY EXERCISE RESTRICTIONS (approved by project owner)
+- Red Team and Blue Team security exercises are restricted to the isolated Security Lab environment (APP_ENV=lab):
+  its own Supabase project, its own credentials, dedicated test accounts, non-production data.
+- Production (APP_ENV=production) must NOT receive destructive tests, load/abuse testing, or intentionally introduced vulnerabilities.
+- Only the Let's Test It application itself is in scope. No third-party systems.
+- Never use production secrets or production user data in the Lab.
+- Testing must be non-destructive; evidence must not contain passwords, tokens, cookies or service-role keys.
+- Red/Blue Team modules themselves are NOT implemented yet (Phase 4/5); this entry only fixes the rules they must follow.
+- The earlier Phase 0 statement "no vulnerability probing" still applies to anything outside this Lab scope.

@@ -1,0 +1,39 @@
+LET'S TEST IT — TESTING REPORT
+Date: 2026-11-02
+Scope: Phase 0 storefront prototype only; no external target, backend, payment, or private environment.
+
+Automated checks
+Check | Result | Evidence
+`pnpm install --frozen-lockfile` | PASS | Frozen dependency resolution completed.
+`pnpm typecheck` | PASS | `tsc --noEmit` completed with exit code 0.
+`pnpm lint` | PASS | `eslint .` completed with exit code 0.
+`pnpm build` | PASS | Next.js 16.4.3 production build and static export completed; 50 pages prerendered.
+`pnpm check:public-build` | PASS | No private-looking paths or known flag-shaped references in `out/`.
+Export size/routes | PASS | `out/` was 3.5 MB; all 36 product detail paths were exported.
+
+Browser spot checks
+- Desktop homepage at 1600×896, light color scheme: page title/content rendered; hero and primary action visible; primary button label contrast was inspected and improved.
+- Mobile homepage at 390×844, light scheme: responsive header/menu and homepage rendered. Mobile navigation opened and closed.
+- Mobile catalog at 390×844: search, category and sort controls fit the viewport; measured `document.documentElement.scrollWidth === clientWidth === 390` (no horizontal overflow).
+- Catalog query `?category=camp` selected the camp/sleep category and showed six matching products; entering “Lantern” narrowed that result to one product.
+- Switched language and currency to Indonesian/USD; localized controls and prices updated. Preferences remained stored when navigating to a static product route.
+- Product detail quantity incremented from one to two, and both units were added to the local demo cart. Cart totals and line quantities rendered.
+- Checkout form accepted a non-personal test value; demo confirmation and tracking views rendered. The flow displayed no real payment, order service, email, or shipment connection and cleared the demo cart.
+- Removed a later demo item from the cart and verified the localized empty-cart state.
+- Contact form was submitted with a non-sensitive sample note; the localized success confirmation appeared.
+- Newsletter form was submitted with an example-only address; the localized success message appeared. The app does not persist or send the entered email.
+
+Browser test caveats
+- Several first waits used English text after Indonesian locale had persisted. Those waits timed out on the language mismatch; a fresh accessibility snapshot showed the expected Indonesian content. This was a test expectation mismatch, not an application exception.
+- The first newsletter submit attempt was blocked by the open mobile navigation overlay. Closing the menu and repeating the observed form interaction succeeded.
+- No runtime exceptions were reported by the browser console during the inspected flows. These were manual browser spot checks, not a full automated accessibility suite or cross-browser matrix.
+
+Not tested / not implemented
+- Real accounts, APIs, database persistence, server-side stock/order validation, payment, shipping carrier integration, email delivery, analytics, and deployment.
+- High-volume/performance testing, full keyboard-only audit, automated WCAG/axe scan, screen-reader testing, real device matrix, legal/commercial review, or production security assessment.
+- PostgreSQL Compose sample was not started. No external free-tier account or deployment was created.
+
+Artifacts captured outside the repository
+- `/tmp/agent-browser/lets-test-it-desktop-final.png`
+- `/tmp/agent-browser/lets-test-it-mobile-final.png`
+- `/tmp/agent-browser/lets-test-it-catalog-mobile.png`

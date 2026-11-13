@@ -1,0 +1,62 @@
+LET'S TEST IT — PHASE 2 PROPOSAL (FOR REVIEW; NOTHING APPLIED)
+Date: 2026-11-13
+
+A. DECISIONS NEEDED FROM YOU (blocking Phase 3)
+ 1. Remove `output: 'export'` (LT-001). Required for Vercel + Supabase server-side auth. Existing pages stay identical.
+ 2. Replace Cloudflare `_headers` with Next `headers()` (LT-002).
+ 3. Keep `static-link.tsx` (plain <a>) for storefront links; auth/admin areas will use next/link. OK?
+ 4. Roles: super_admin & admin start with what permissions? Proposed default in section D.
+ 5. Mark docker Postgres compose + POSTGRES_* vars as deprecated (Supabase only)? 
+ 6. Update docs/04 ROE: Red/Blue Team module is authorised ONLY against this app, Security Lab environment,
+    dedicated test accounts, non-destructive; never production. (Your master requirement already says this;
+    I will record it so the project docs don't contradict themselves.)
+
+B. ARCHITECTURE (one app, additive)
+ Public (unchanged): / /catalog /products/* /cart /checkout /about /help /contact ...
+ New public: /login /register /forgot-password /reset-password /auth/callback  (Supabase email+password only)
+ Member: /dashboard
+ Staff: /admin (users, roles, content, audit logs, settings)
+ Modules: /admin/red-team, /admin/blue-team (assessments, findings, events, alerts, incidents, exercises)
+ Server layer: `proxy.ts` (session refresh + route gate), `src/server/auth` (getUser + role from user_roles, never user_metadata),
+   `src/server/security-events` (structured logger with redaction), route handlers under app/api/*.
+ Supabase clients: browser (anon key), server (cookies, SSR), admin (service role, server-only, `import 'server-only'`).
+ Packages to add: @supabase/supabase-js, @supabase/ssr, zod, server-only.
+ Header/footer: add Login / Register (or Dashboard / Logout) buttons only; no redesign. EN/ID strings added to messages.ts.
+
+C. ENVIRONMENT VARIABLES (set in Vercel -> Project Settings -> Environment Variables)
+ NEXT_PUBLIC_SUPABASE_URL          Supabase -> Project Settings -> API -> Project URL            (public)
+ NEXT_PUBLIC_SUPABASE_ANON_KEY     same page, anon/publishable key                               (public, RLS protects it)
+ SUPABASE_SERVICE_ROLE_KEY         same page, service_role/secret key   (SERVER ONLY, never NEXT_PUBLIC, never commit)
+ SUPABASE_OWNER_USER_ID            Supabase -> Authentication -> Users -> your UUID (after you register your own account)
+ NEXT_PUBLIC_SITE_URL              e.g. https://your-app.vercel.app (used for email links/redirects)
+ APP_ENV                           development | lab | production   (tags security events; controls what Red Team may do)
+ SECURITY_IP_HASH_SALT             random 32+ chars (hash source IPs in events)
+ Use SEPARATE values per environment. Security Lab = its own Supabase project + its own keys. Never reuse production keys.
+ Remove/ignore: POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, API_BASE_URL (unused).
+
+D. SUPABASE SETUP CHECKLIST
+ 1. Create 2 Supabase projects: `lets-test-it-lab` and `lets-test-it-prod` (lab first).
+ 2. Authentication -> Providers: enable Email only; keep "Confirm email" ON. Disable Google and all others.
+ 3. Authentication -> URL Configuration: Site URL = your Vercel URL; add Redirect URLs: <site>/auth/callback, <site>/reset-password.
+ 4. SQL editor: review then run supabase/proposed-migrations/0001_identity_rbac.sql in the LAB project only.
+ 5. Register your account on the site, copy your UUID into SUPABASE_OWNER_USER_ID, deploy; bootstrap runs server-side, idempotent.
+ 6. Enable Auth rate limits / CAPTCHA (Supabase dashboard) before going public.
+ Default permissions proposal: admin = users(read), content, products, reports(read); super_admin = admin + users(manage non-privileged),
+ blue-team read/triage; owner = everything incl. role changes, audit logs, settings, red-team approval.
+
+E. ROLE RULES (enforced server-side + RLS)
+ - Signup trigger always creates role 'user'; user_metadata ignored.
+ - One owner: partial unique index + protect_owner trigger + bootstrap_owner() callable by service_role only.
+ - admin/super_admin cannot touch owner/super_admin rows (checked in API + trigger).
+ - Role change/permission change/owner actions => audit_logs + security_events.
+
+F. MIGRATION ROADMAP (each reviewed before applying)
+ 0001 identity_rbac (drafted)  | 0002 detection_rules, security_alerts, security_incidents, incident_notes
+ 0003 security_assessments, assessment_findings, assessment_evidence, assessment_retests (+ exercises)
+ 0004 products/site_content tables ONLY if you want admin-managed catalog (currently catalog is static files)
+ Rule in DB: finding cannot become 'verified_fixed' without a passed retest row.
+
+G. NEXT PHASES AFTER YOUR APPROVAL
+ Phase 3 auth+RBAC+dashboards -> 4 Red Team -> 5 Blue Team/detection/incidents -> 6 vuln mgmt/reports -> 7 hardening -> 8 retest.
+ Honest limit: I can write and typecheck code here, but can't run Supabase, email verification or browser tests from this sandbox.
+ Those validations will be listed as "needs your run" with exact steps, never claimed as passed.

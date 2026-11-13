@@ -1,0 +1,40 @@
+NOTE (Phase 3, 2026-11-13): the "Static deployment boundary" and "no route handlers / cookies / backend" statements below describe
+Phase 0 and are SUPERSEDED. The app is now a regular Next.js server app (no `output: 'export'`) with Supabase Auth, proxy.ts,
+route handlers (/auth/callback, /api/me) and server actions. Storefront pages remain statically generated. See docs/11-phase3-report.txt.
+
+LET'S TEST IT — ARCHITECTURE
+Updated: 2026-11-02
+
+Selected structure
+- Next.js 16 App Router remains at the repository-root `app/` path to preserve the existing scaffold.
+- `src/catalog/` contains the typed Product model, 36 synthetic fixtures, and a CatalogService abstraction. The demo implementation is local and can later be replaced by an API adapter.
+- `src/store/` contains language messages and the prototype state provider.
+- `src/components/store/` contains storefront shell, product, catalog, cart, checkout, help, and status UI.
+- `public/` contains only public-safe SVG brand/campaign/category art and Cloudflare Pages response-header configuration.
+- `docs/` contains plain-text project documentation.
+- `docker/compose.example.yml` and `.env.example` are future local-development examples only. They are not invoked by the frontend or build.
+- Private future-phase workspaces (`red-team/`, `blue-team/`, `sandbox/`, `backend/`) are gitignored and are not created or imported into the public frontend.
+
+Runtime and data flow
+1. Next.js static generation renders the home, catalog, corporate, help, cart, checkout, order status, and each known product route during `next build`.
+2. The static catalog data module feeds product cards and product detail pages.
+3. Client-side search, sorting, filtering, and quantity selection operate on the 36 local demo products; internal links use full-document navigation for reliable static-export routing in the preview.
+4. StoreProvider persists only cart item IDs/quantities plus language and currency preferences in browser localStorage. It never stores identity, address, payment, or contact-form data.
+5. Checkout creates a browser-only `DEMO-...` reference, clears the demo cart, and routes to static confirmation/tracking pages. No order API or payment provider is called.
+6. Newsletter/contact forms prevent submission and display a local confirmation only; no email or support ticket is sent.
+
+Internationalization and currency
+- English is the initial language; Indonesian is selectable in the header/mobile navigation.
+- Prices are authored once as stable IDR values. USD is a display conversion using the documented fixed assumption IDR 15,800 per USD, not a live rate.
+- Formatting uses Intl.NumberFormat with `en-US` or `id-ID` locale conventions.
+
+Static deployment boundary
+- Next config uses `output: 'export'` and trailing slashes. Product routes have explicit `generateStaticParams()` from the public synthetic catalog.
+- There are no route handlers, server actions, authentication, cookies, dynamic server requests, backend, or database in this phase.
+- Cloudflare Pages `_headers` are copied from `public/_headers` to the static output. Private workspace names and synthetic flag-shaped strings are checked by `scripts/check-public-build.mjs` after the build.
+- Future private components must not be placed under `public/`, imported by the storefront, or shipped in the `out/` artifact.
+
+Trust boundaries
+- Browser state is untrusted and limited to prototype preferences/cart quantities; catalog stock caps are rechecked client-side.
+- This is not an order system and makes no authorization or inventory guarantee.
+- Security training and vulnerable scenarios are out of scope; no challenge metadata or flags exist in the public app.

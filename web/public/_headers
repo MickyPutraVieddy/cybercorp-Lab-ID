@@ -1,0 +1,6 @@
+# Phase 3: no longer used on Vercel (Cloudflare format). Equivalent headers are in next.config.mjs.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=63072000
+  Permissions-Policy: camera=(), microphone=(), geolocation=()

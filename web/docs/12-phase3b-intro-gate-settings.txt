@@ -1,0 +1,70 @@
+LET'S TEST IT — PHASE 3b: INTRO GATE, HEADER ICONS, SETTINGS
+Date: 2026-11-13
+Scope: UI/flow change on top of Phase 3. No new dependencies. No migration applied (0003 is PROPOSED only).
+
+1. WHAT CHANGED (user request)
+ a) First page (/) is now an introduction page with the login / register forms next to it. The store is behind login.
+    After a successful login the user lands on /home (store home: catalog, bag, checkout preview).
+ b) Design follows the existing Let's Test It look (forest green, cream paper, clay accent, Georgia headings). Intro layout is
+    a hero (badge, headline, lead, CTA, stats strip) + auth card on the campaign artwork, then About / How it works / Roles.
+ c) Header (store pages):
+      - Guest: PROFILE icon + "Log in" label. Tooltip: "Profile icon — click here to log in".
+      - Signed in: SETTINGS icon + role chip (Member / Admin / Super admin / Owner). Tooltip: "Settings — your role: <role>".
+      - owner / super_admin / admin: extra "ADMIN DASHBOARD" button (tooltip: "Click here to open the Admin Dashboard") -> /admin.
+      - Log out icon. On phones the icons stay in the header, text labels are in the mobile menu.
+ d) /settings (new, e-commerce style "My account"): avatar + name + @username + email, role pill + description of what that role
+    can do, Admin Dashboard button for staff, shortcuts (store, bag, order tracking), edit username / full name / phone,
+    shipping address, language + currency preferences, change password, log out.
+ e) /admin layout got "Back to store" and "My settings" links.
+
+2. ROUTING / ACCESS RULES
+ - PUBLIC: /  (intro + login/register), /login & /register (redirect to /?mode=...), /forgot-password, /reset-password,
+           /about /help /contact /privacy /terms /careers, /auth/callback, /api/me.
+ - NEEDS LOGIN (proxy.ts gate, then server-side again): /home /catalog /products/* /cart /checkout /order-confirmation
+           /order-tracking /settings /dashboard /admin/*.
+ - Not logged in -> redirect to /?mode=login&next=<path>. After login -> <next> (same-site paths only) or /home.
+ - Logged in visiting / -> redirect to /home.
+ - /dashboard -> redirect to /settings (old links keep working). Email confirmation now lands on /home?notice=confirmed.
+ - homeForRole() now returns /home for every role (staff used to land on /admin; they now use the Admin Dashboard button).
+ - FAIL-CLOSED: if Supabase env vars are missing, the store pages redirect to the intro page, which shows
+   "Authentication is not configured". Configure Supabase (docs/11 section 5) before the store can be opened.
+ - / and /settings now send X-Frame-Options DENY, frame-ancestors 'none', Cache-Control no-store (next.config.mjs).
+
+3. NEW MIGRATION (PROPOSED, NOT APPLIED): supabase/proposed-migrations/0003_profile_settings.sql
+ - profiles.username (3-24 chars, a-z 0-9 . _ ; unique case-insensitive; reserved names blocked, e.g. admin/owner/root/support).
+ - public.profile_details (phone, address, city, province, postal code) with owner-only RLS and NO staff policy:
+   admins cannot read members' phone/address (privacy by design; profiles has a staff-read policy, so these fields were NOT put there).
+ - Column grant: authenticated may update (full_name, username) on profiles only.
+ - Without 0003 the settings page still works for name + password; username/address save shows "not available yet".
+ - Run order in the LAB project: 0001, 0002, then 0003. Read it first.
+
+4. FILES
+ New:  app/home/page.tsx, app/settings/page.tsx, src/components/intro/intro-screen.tsx,
+       src/components/account/{account-form,settings-view}.tsx, src/server/actions/account.ts,
+       supabase/proposed-migrations/0003_profile_settings.sql, docs/12-...txt
+ Changed: app/page.tsx (intro), app/login|register|dashboard/page.tsx (now redirects), app/auth/callback/route.ts, app/admin/layout.tsx,
+       app/globals.css (appended block), next.config.mjs, proxy.ts, src/components/auth/{auth-nav.tsx,copy.ts},
+       src/components/store/{store-header,store-footer,home-screen}.tsx, src/server/{roles,rbac,validation}.ts, src/server/actions/auth.ts
+ Left in place but now unused: src/components/auth/dashboard-view.tsx, ProfileForm/updateProfileAction (superseded by AccountForm).
+ Untouched: catalog, cart/checkout logic, store-provider, brand assets, existing CSS rules, migrations 0001/0002.
+
+5. VERIFICATION ACTUALLY RUN (review sandbox, no network, packages not installable)
+ - Syntax parse of every changed/new .ts/.tsx/.mjs file (TypeScript transpile, no errors). All i18n keys used exist, no duplicate keys.
+ - Visual check in Chromium of static HTML mock-ups built from the REAL globals.css: intro page (desktop + phone), header states
+   (guest / super admin, 1366 / 1100 / 390 px, tooltips), settings page.
+ - NOT run: pnpm install, tsc against real types, next build, any Supabase call, RLS test, real login flow. Expect small fixes on first run.
+
+6. MANUAL TESTS (after pnpm install + Supabase setup from docs/11 section 5)
+ N1  Open /  while logged out: intro page, no store header/footer, login form visible. Toggle Register tab and back.
+ N2  Open /home, /catalog, /cart logged out -> redirected to /?mode=login&next=... ; after login you return to that page.
+ N3  Wrong password -> "Invalid email or password". Correct -> /home with the bag icon + header icons.
+ N4  Register -> "check your email" message; confirm via email -> /home with "Your email is confirmed" banner.
+ N5  Header as Member: Settings icon + "Member" chip, no Admin Dashboard button. /admin by URL -> /settings?notice=forbidden.
+ N6  Header as admin / super_admin / owner: "Admin Dashboard" button opens /admin. Settings page shows the right role text.
+ N7  /settings: set username (valid), save -> saved (needs 0003). Same username from a 2nd account -> "already taken".
+     Username "admin" -> rejected. Phone "abc" -> rejected. Change password flow still works.
+ N8  As admin, in SQL: select * from public.profile_details; with the admin's session -> only the admin's own row.
+ N9  Log out -> back to /, header gone, /home redirects to the intro page.
+ N10 /login?next=https://evil.example and //evil.example -> after login lands on /home (never off-site). /dashboard -> /settings.
+ N11 curl -sI <site>/ -> X-Frame-Options DENY, Cache-Control no-store.
+ N12 Phone width: header keeps profile/settings/admin icons; mobile menu shows text labels.
