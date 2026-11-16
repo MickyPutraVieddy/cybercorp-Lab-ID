@@ -15,11 +15,19 @@ const sensitiveHeaders = [
   { key: 'Cache-Control', value: 'no-store' },
 ]
 
+// Allow product images served from Supabase Storage (host derived from whichever URL variable is set).
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+let supabaseHost = null
+try { supabaseHost = supabaseUrl ? new URL(supabaseUrl).hostname : null } catch {}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  // Product image upload goes through a Server Action (max 2 MB file enforced in the action; default body limit is 1 MB).
+  experimental: { serverActions: { bodySizeLimit: '3mb' } },
   images: {
     unoptimized: true,
+    remotePatterns: supabaseHost ? [{ protocol: 'https', hostname: supabaseHost, pathname: '/storage/v1/object/public/**' }] : [],
   },
   async headers() {
     return [

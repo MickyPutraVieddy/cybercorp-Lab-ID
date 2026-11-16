@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from './static-link'
 import { ArrowRight, Search, SlidersHorizontal } from 'lucide-react'
-import { categories, products } from '@/src/catalog/products'
+import { categories } from '@/src/catalog/products'
+import { useProducts } from '@/src/catalog/catalog-provider'
 import type { ProductCategory } from '@/src/catalog/types'
 import { useStore } from '@/src/store/store-provider'
 import { ProductCard } from './product-card'
@@ -14,6 +15,7 @@ type SortValue = 'featured' | 'price-low' | 'price-high' | 'rating' | 'newest'
 
 export function CatalogScreen() {
   const { language, t } = useStore()
+  const products = useProducts()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<ProductCategory | 'all'>('all')
   const [availableOnly, setAvailableOnly] = useState(false)
@@ -47,7 +49,7 @@ export function CatalogScreen() {
       if (sort === 'newest') return Number(Boolean(second.isNew)) - Number(Boolean(first.isNew))
       return Number(Boolean(second.bestSeller)) - Number(Boolean(first.bestSeller))
     })
-  }, [availableOnly, category, language, query, sort])
+  }, [availableOnly, category, language, products, query, sort])
 
   function clearFilters() {
     setQuery('')

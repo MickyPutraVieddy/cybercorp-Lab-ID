@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from './static-link'
 import { Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
-import { getProductById } from '@/src/catalog/products'
+import { getProductById } from '@/src/catalog/registry'
 import { useStore } from '@/src/store/store-provider'
 import { artworkByCategory } from './product-card'
 
@@ -39,7 +39,7 @@ export function CartScreen() {
         <section className="cart-lines" aria-label={t('bag')}>
           {lines.map(({ product, quantity }) => (
             <article className="cart-line" key={product.id}>
-              <Link className="cart-line-art" href={`/products/${product.slug}`}><Image src={artworkByCategory[product.category]} alt={`Illustration for ${product.name[language]}`} width={150} height={150} /></Link>
+              <Link className="cart-line-art" href={`/products/${product.slug}`}><Image src={product.imageUrl ?? artworkByCategory[product.category]} alt={`Illustration for ${product.name[language]}`} width={150} height={150} /></Link>
               <div>
                 <h2><Link href={`/products/${product.slug}`}>{product.name[language]}</Link></h2>
                 <p>{formatPrice(product.priceIdr)} · {product.stock < 1 ? t('soldOut') : t('inStock')}</p>

@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Security Lab Overview' }
 
 const modules = [
   { title: 'Identity & access', desc: 'Review users, role assignments, and privilege boundaries.', href: '/admin/users', icon: Users, tone: 'violet', state: 'AVAILABLE' },
-  { title: 'Product management', desc: 'Inspect the demo catalog and its current inventory data.', href: '/admin/products', icon: Package, tone: 'blue', state: 'CATALOG PREVIEW' },
+  { title: 'Product management', desc: 'Create, edit and remove products stored in Supabase.', href: '/admin/products', icon: Package, tone: 'blue', state: 'LIVE DATABASE' },
   { title: 'Audit trail', desc: 'Review recorded administrative and security-sensitive actions.', href: '/admin/audit', icon: ClipboardCheck, tone: 'amber', state: 'AVAILABLE' },
   { title: 'Red Team workspace', desc: 'Plan authorized attack simulations against isolated lab assets.', href: '#red-team', icon: Waypoints, tone: 'red', state: 'PLANNED' },
   { title: 'Blue Team monitoring', desc: 'Triage telemetry, investigate alerts, and validate detections.', href: '#blue-team', icon: ShieldCheck, tone: 'green', state: 'PLANNED' },

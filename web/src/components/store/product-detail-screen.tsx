@@ -5,13 +5,15 @@ import Link from './static-link'
 import { useState } from 'react'
 import { ArrowRight, Check, Minus, Plus, ShieldCheck, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { categories, products } from '@/src/catalog/products'
+import { categories } from '@/src/catalog/products'
+import { useProducts } from '@/src/catalog/catalog-provider'
 import type { Product } from '@/src/catalog/types'
 import { useStore } from '@/src/store/store-provider'
 import { artworkByCategory, ProductCard } from './product-card'
 
 export function ProductDetailScreen({ product }: { product: Product }) {
   const { addToCart, formatPrice, language, t } = useStore()
+  const products = useProducts()
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const category = categories.find((item) => item.id === product.category)
@@ -28,7 +30,7 @@ export function ProductDetailScreen({ product }: { product: Product }) {
       <div className="breadcrumbs"><Link href="/">{t('home')}</Link><span aria-hidden="true">/</span><Link href="/catalog">{t('catalog')}</Link><span aria-hidden="true">/</span><span>{product.name[language]}</span></div>
       <section className="product-detail">
         <div className="product-detail-art">
-          <Image src={artworkByCategory[product.category]} alt={`Original ${category?.name[language].toLowerCase()} illustration; product photography will be added later`} width={760} height={780} priority />
+          <Image src={product.imageUrl ?? artworkByCategory[product.category]} alt={`Original ${category?.name[language].toLowerCase()} illustration; product photography will be added later`} width={760} height={780} priority />
         </div>
         <div className="product-detail-copy">
           <span className="eyebrow">{category?.name[language]}</span>

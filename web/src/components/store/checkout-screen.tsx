@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 import { ArrowLeft, Info } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { getProductById } from '@/src/catalog/products'
+import { getProductById } from '@/src/catalog/registry'
 import { useStore } from '@/src/store/store-provider'
 
 const FREE_SHIPPING_THRESHOLD = 1500000

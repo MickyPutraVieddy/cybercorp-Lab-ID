@@ -3,7 +3,8 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import { ArrowRight, Globe2, Layers, PackageCheck, ShieldCheck, UserCog, UserRound, Crown, Shield } from 'lucide-react'
-import { categories, products } from '@/src/catalog/products'
+import { categories } from '@/src/catalog/products'
+import { useProducts } from '@/src/catalog/catalog-provider'
 import { useStore } from '@/src/store/store-provider'
 import { LoginForm, RegisterForm } from '@/src/components/auth/auth-forms'
 import { FormMessage, NoticeBanner } from '@/src/components/auth/form-message'
@@ -34,6 +35,7 @@ const roleCards: { role: Role; icon: typeof UserRound }[] = [
  */
 export function IntroScreen({ initialMode, next, configured, error, notice }: Props) {
   const { language, setLanguage } = useStore()
+  const products = useProducts()
   const [mode, setMode] = useState<Mode>(initialMode)
   const t = (key: string) => text(language, key)
 

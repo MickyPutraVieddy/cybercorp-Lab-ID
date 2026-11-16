@@ -31,7 +31,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="product-card">
       <Link className="product-art" href={`/products/${product.slug}`} aria-label={`${product.name[language]} — ${t('description')}`}>
-        <Image src={artworkByCategory[product.category]} alt={`Illustrative ${category?.name[language].toLowerCase()} artwork`} width={600} height={620} />
+        <Image src={product.imageUrl ?? artworkByCategory[product.category]} alt={`Illustrative ${category?.name[language].toLowerCase()} artwork`} width={600} height={620} />
         <span className="product-badges">
           {product.bestSeller && <span className="product-badge">{t('bestSellers')}</span>}
           {product.isNew && <span className="product-badge">{t('newThisSeason')}</span>}

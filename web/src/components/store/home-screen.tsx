@@ -5,7 +5,8 @@ import Link from './static-link'
 import { ArrowRight, ArrowUpRight, Leaf, PackageCheck, RotateCcw } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { useStore } from '@/src/store/store-provider'
-import { categories, products } from '@/src/catalog/products'
+import { categories } from '@/src/catalog/products'
+import { useProducts } from '@/src/catalog/catalog-provider'
 import { NoticeBanner } from '@/src/components/auth/form-message'
 import { NewsletterSignup } from './newsletter-signup'
 import { ProductCard } from './product-card'
@@ -16,6 +17,7 @@ const reviewAuthors = ['A. R.', 'M. T.', 'S. K.']
 
 export function HomeScreen({ notice }: { notice?: 'confirmed' }) {
   const { language, t } = useStore()
+  const products = useProducts()
   const featured = products.filter((product) => product.bestSeller).slice(0, 4)
   const newArrivals = products.filter((product) => product.isNew).slice(0, 4)
 

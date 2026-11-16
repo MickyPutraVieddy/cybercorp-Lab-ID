@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getSupabasePublicConfig } from '@/src/server/env'
 
 // Session refresh + coarse route gate. This is defense in depth only: every page, action and API still
 // re-verifies the user and role server-side. Storefront routes are intentionally NOT matched (they stay static).
@@ -8,8 +9,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PROTECTED = /^\/(dashboard|admin|settings|home|catalog|products|cart|checkout|order-confirmation|order-tracking)(\/|$)/
 
 export async function proxy(request: NextRequest) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const supabaseConfig = getSupabasePublicConfig()
   const path = request.nextUrl.pathname
   let response = NextResponse.next({ request })
 
@@ -20,9 +20,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(target)
   }
 
-  if (!url || !anonKey) return PROTECTED.test(path) ? redirectToLogin() : response
+  if (!supabaseConfig) return PROTECTED.test(path) ? redirectToLogin() : response
 
-  const supabase = createServerClient(url, anonKey, {
+  const supabase = createServerClient(supabaseConfig.url, supabaseConfig.anonKey, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll(list) {

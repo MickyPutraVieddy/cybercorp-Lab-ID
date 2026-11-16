@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore } from 'react'
-import { getProductById } from '@/src/catalog/products'
+import { getProductById } from '@/src/catalog/registry'
 import type { CartLine } from '@/src/catalog/types'
 import { translate, type Language, type MessageKey } from './messages'
 
